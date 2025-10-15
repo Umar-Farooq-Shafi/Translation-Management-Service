@@ -1,24 +1,29 @@
 version: "3.9"
+
 services:
   app:
     build:
-      context: ./docker
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: docker/Dockerfile
+    working_dir: /var/www/html
     volumes:
       - ./:/var/www/html
-    working_dir: /var/www/html
     environment:
-      - APP_ENV=local
-      - APP_DEBUG=true
-      - DB_HOST=db
-      - DB_DATABASE=laravel
-      - DB_USERNAME=laravel
-      - DB_PASSWORD=secret
-      - CACHE_DRIVER=redis
-      - REDIS_HOST=redis
+      APP_ENV: local
+      APP_DEBUG: "true"
+      DB_HOST: db
+      DB_DATABASE: laravel
+      DB_USERNAME: laravel
+      DB_PASSWORD: secret
+      CACHE_DRIVER: redis
+      REDIS_HOST: redis
     depends_on:
       - db
       - redis
+    command: >
+      sh -c "composer install &&
+             php artisan key:generate &&
+             php-fpm"
 
   web:
     image: nginx:alpine
@@ -33,10 +38,10 @@ services:
   db:
     image: mysql:8
     environment:
-      - MYSQL_DATABASE=laravel
-      - MYSQL_USER=laravel
-      - MYSQL_PASSWORD=secret
-      - MYSQL_ROOT_PASSWORD=root
+      MYSQL_DATABASE: laravel
+      MYSQL_USER: laravel
+      MYSQL_PASSWORD: secret
+      MYSQL_ROOT_PASSWORD: root
     ports:
       - "3307:3306"
     command: ["--default-authentication-plugin=mysql_native_password", "--sql-mode="]

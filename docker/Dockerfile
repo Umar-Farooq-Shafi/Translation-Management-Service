@@ -18,8 +18,21 @@ RUN { \
   echo 'opcache.validate_timestamps=0'; \
 } > /usr/local/etc/php/conf.d/opcache.ini
 
-# Set the working directory
 WORKDIR /var/www/html
 
-# Copy your app files (optional — if you don’t use volumes)
-# COPY . /var/www/html
+# Copy only composer files first for caching
+COPY composer.json ./
+
+# Install dependencies (build vendor folder inside image)
+RUN composer install --no-interaction --no-dev --optimize-autoloader
+
+# Copy rest of the application
+COPY . .
+
+# Ensure necessary Laravel directories exist
+RUN mkdir -p storage bootstrap/cache && \
+    chown -R www-data:www-data storage bootstrap/cache && \
+    chmod -R 775 storage bootstrap/cache
+
+EXPOSE 9000
+CMD ["php-fpm"]
