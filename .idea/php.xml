@@ -68,8 +68,6 @@
       <path value="$PROJECT_DIR$/vendor/league/flysystem-local" />
       <path value="$PROJECT_DIR$/vendor/league/config" />
       <path value="$PROJECT_DIR$/vendor/league/flysystem" />
-      <path value="$PROJECT_DIR$/vendor/league/uri-interfaces" />
-      <path value="$PROJECT_DIR$/vendor/league/uri" />
       <path value="$PROJECT_DIR$/vendor/league/commonmark" />
       <path value="$PROJECT_DIR$/vendor/nesbot/carbon" />
       <path value="$PROJECT_DIR$/vendor/ramsey/collection" />
@@ -114,15 +112,26 @@
       <path value="$PROJECT_DIR$/vendor/symfony/service-contracts" />
       <path value="$PROJECT_DIR$/vendor/symfony/http-foundation" />
       <path value="$PROJECT_DIR$/vendor/symfony/error-handler" />
-      <path value="$PROJECT_DIR$/vendor/symfony/clock" />
       <path value="$PROJECT_DIR$/vendor/symfony/process" />
       <path value="$PROJECT_DIR$/vendor/symfony/console" />
       <path value="$PROJECT_DIR$/vendor/symfony/polyfill-mbstring" />
       <path value="$PROJECT_DIR$/vendor/symfony/polyfill-intl-grapheme" />
       <path value="$PROJECT_DIR$/vendor/theseer/tokenizer" />
+      <path value="$PROJECT_DIR$/vendor/mockery/mockery" />
+      <path value="$PROJECT_DIR$/vendor/symfony/yaml" />
+      <path value="$PROJECT_DIR$/vendor/hamcrest/hamcrest-php" />
+      <path value="$PROJECT_DIR$/vendor/psy/psysh" />
+      <path value="$PROJECT_DIR$/vendor/laravel/tinker" />
+      <path value="$PROJECT_DIR$/vendor/laravel/sanctum" />
+      <path value="$PROJECT_DIR$/vendor/laravel/sail" />
+      <path value="$PROJECT_DIR$/vendor/spatie/backtrace" />
+      <path value="$PROJECT_DIR$/vendor/spatie/flare-client-php" />
+      <path value="$PROJECT_DIR$/vendor/spatie/ignition" />
+      <path value="$PROJECT_DIR$/vendor/spatie/error-solutions" />
+      <path value="$PROJECT_DIR$/vendor/spatie/laravel-ignition" />
     </include_path>
   </component>
-  <component name="PhpProjectSharedConfiguration" php_language_level="8.2" />
+  <component name="PhpProjectSharedConfiguration" php_language_level="8.1" />
   <component name="PhpStanOptionsConfiguration">
     <option name="transferred" value="true" />
   </component>
