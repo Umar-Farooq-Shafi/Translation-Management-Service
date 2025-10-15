@@ -20,16 +20,13 @@ RUN { \
 
 WORKDIR /var/www/html
 
-# Copy only composer files first for caching
-COPY composer.json ./
-
-# Install dependencies (build vendor folder inside image)
-RUN composer install --no-interaction --no-dev --optimize-autoloader
-
-# Copy rest of the application
+# Copy entire project first (so artisan exists)
 COPY . .
 
-# Ensure necessary Laravel directories exist
+# Install dependencies but skip scripts during build
+RUN composer install --no-interaction --no-dev --optimize-autoloader --no-scripts
+
+# Create necessary directories and set permissions
 RUN mkdir -p storage bootstrap/cache && \
     chown -R www-data:www-data storage bootstrap/cache && \
     chmod -R 775 storage bootstrap/cache

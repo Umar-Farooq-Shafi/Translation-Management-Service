@@ -21,9 +21,10 @@ services:
       - db
       - redis
     command: >
-      sh -c "composer install &&
-             php artisan key:generate &&
-             php-fpm"
+        sh -c "[ ! -f .env ] && cp .env.example .env || true &&
+         composer install --no-interaction --no-progress &&
+         php artisan key:generate &&
+         php-fpm"
 
   web:
     image: nginx:alpine
