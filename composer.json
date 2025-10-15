@@ -1,0 +1,38 @@
+{
+  "name": "vercel/translation-management-service",
+  "description": "High-performance Translation Management Service (Laravel).",
+  "type": "project",
+  "license": "MIT",
+  "require": {
+    "php": "^8.2",
+    "laravel/framework": "^11.0",
+    "guzzlehttp/guzzle": "^7.8"
+  },
+  "require-dev": {
+    "laravel/pint": "^1.15",
+    "nunomaduro/collision": "^8.0",
+    "phpunit/phpunit": "^10.5",
+    "fakerphp/faker": "^1.23"
+  },
+  "autoload": {
+    "psr-4": {
+      "App\\": "app/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Database\\Factories\\": "database/factories/",
+      "Database\\Seeders\\": "database/seeders/"
+    }
+  },
+  "minimum-stability": "stable",
+  "prefer-stable": true,
+  "config": {
+    "sort-packages": true
+  },
+  "extra": {
+    "laravel": {
+      "dont-discover": []
+    }
+  }
+}

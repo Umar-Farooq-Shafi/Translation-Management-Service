@@ -1,0 +1,123 @@
+openapi: 3.0.3
+info:
+  title: Translation Management Service
+  version: "1.0.0"
+servers:
+  - url: https://api.example.com
+paths:
+  /api/translations:
+    get:
+      summary: List translations
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: query
+          name: locale
+          schema: { type: string }
+        - in: query
+          name: key
+          schema: { type: string }
+        - in: query
+          name: q
+          schema: { type: string, description: "Search in value" }
+        - in: query
+          name: tags
+          schema:
+            type: array
+            items: { type: string }
+      responses:
+        "200":
+          description: OK
+    post:
+      summary: Create or update translation (upsert by key+locale)
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [key, locale, value]
+              properties:
+                key: { type: string }
+                locale: { type: string }
+                value: { type: string }
+                tags:
+                  type: array
+                  items: { type: string }
+      responses:
+        "201":
+          description: Created
+  /api/translations/{id}:
+    get:
+      summary: Show translation
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          schema: { type: integer }
+          required: true
+      responses:
+        "200": { description: OK }
+    put:
+      summary: Update translation
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          schema: { type: integer }
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                key: { type: string }
+                locale: { type: string }
+                value: { type: string }
+                tags:
+                  type: array
+                  items: { type: string }
+      responses:
+        "200": { description: OK }
+    delete:
+      summary: Delete translation
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          schema: { type: integer }
+          required: true
+      responses:
+        "204": { description: No Content }
+  /api/export:
+    get:
+      summary: Export translations as key-value JSON
+      description: Returns map of keys to values for a locale, optional tag filter. Supports ETag/If-None-Match.
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: query
+          name: locale
+          schema: { type: string }
+          required: true
+        - in: query
+          name: tags
+          schema:
+            type: array
+            items: { type: string }
+      responses:
+        "200":
+          description: OK
+          headers:
+            ETag:
+              schema: { type: string }
+              description: Strong validator for cache freshness
+        "304":
+          description: Not Modified
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
