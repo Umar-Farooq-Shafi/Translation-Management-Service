@@ -23,9 +23,4 @@ class Translation extends Model
         'tags' => 'array',
     ];
 
-
-    public function tags()
-    {
-        return $this->belongsToMany(Tag::class, 'translation_tag')->withTimestamps();
-    }
 }

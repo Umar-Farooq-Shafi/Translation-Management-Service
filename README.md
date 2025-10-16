@@ -1,66 +1,284 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+```markdown
+# 🌐 Laravel Translation Management Service
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+This project is built as part of the **Laravel Senior Developer Code Test - DigitalTolk**.
 
-## About Laravel
+It’s an **API-driven Translation Management Service** designed to manage multilingual translations with performance, scalability, and clean code in mind.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+---
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## 🚀 Features
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- Manage translations for multiple locales (`en`, `fr`, `es`, etc.)
+- Tag translations for context (e.g., `mobile`, `desktop`, `web`)
+- RESTful API endpoints for CRUD, search, and export
+- JSON export endpoint for frontend integration (Vue.js / React)
+- Optimized performance:
+  - CRUD/search < **200ms**
+  - JSON export < **500ms** (with caching)
+- Token-based authentication (Laravel Sanctum)
+- Scalable database schema
+- Seeder/command for 100k+ records
+- Dockerized environment
+- PSR-12 and SOLID compliant
+- Unit, feature, and performance tests (coverage > 95%)
+- OpenAPI (Swagger) documentation
+```
 
-## Learning Laravel
+## 🧱 Project Architecture
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+```
+app/
+├── Console/
+│    └── Commands/SeedLargeTranslations.php   # Seed 100k+ records
+├── Http/
+│    ├── Controllers/Api/TranslationController.php
+│    └── Middleware/
+├── Models/
+│    └── Translation.php
+└── ...
+database/
+├── factories/TranslationFactory.php
+└── migrations/xxxx_create_translations_table.php
+routes/
+└── api.php
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+````
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+---
 
-## Laravel Sponsors
+## ⚙️ Installation (Docker Setup)
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+### 1️⃣ Clone & start containers
+```bash
+git clone <repo_url>
+cd <repo_name>
+docker-compose up -d
+````
 
-### Premium Partners
+### 2️⃣ Install dependencies
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+```bash
+docker-compose exec app bash
+composer install
+cp .env.example .env
+php artisan key:generate
+```
 
-## Contributing
+### 3️⃣ Configure `.env`
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Make sure DB settings match your Docker service:
 
-## Code of Conduct
+```env
+DB_HOST=mysql
+DB_PORT=3306
+DB_DATABASE=laravel
+DB_USERNAME=root
+DB_PASSWORD=root
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### 4️⃣ Migrate & seed
 
-## Security Vulnerabilities
+```bash
+php artisan migrate
+php artisan translations:seed-large 100000
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+---
 
-## License
+## 🔐 Authentication
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+API access is secured using **Laravel Sanctum** tokens.
+
+### Create user & token:
+
+```bash
+php artisan tinker
+>>> $user = \App\Models\User::factory()->create(['email' => 'admin@example.com', 'password' => bcrypt('password')]);
+>>> $token = $user->createToken('api')->plainTextToken;
+>>> $token;
+```
+
+Use this token in your API requests:
+
+```
+Authorization: Bearer <token>
+```
+
+---
+
+## 📡 API Endpoints
+
+All endpoints require `Authorization: Bearer <token>`.
+
+### 🔹 List / Search Translations
+
+```
+GET /api/translations
+```
+
+**Query Params:**
+
+| param      | description                           |
+| ---------- | ------------------------------------- |
+| `locale`   | filter by locale (e.g. `en`)          |
+| `tag`      | filter by tag (`web`, `mobile`, etc.) |
+| `search`   | search by key or content              |
+| `per_page` | pagination size (default 50)          |
+
+---
+
+### 🔹 Create / Update Translation
+
+```
+POST /api/translations
+```
+
+```json
+{
+  "key": "auth.login.button",
+  "locale": "en",
+  "content": "Login",
+  "tags": ["web", "desktop"],
+  "context": "auth_ui"
+}
+```
+
+If translation with same `key` + `locale` exists → it will update automatically.
+
+---
+
+### 🔹 Get Single Translation
+
+```
+GET /api/translations/{id}
+```
+
+---
+
+### 🔹 Delete Translation
+
+```
+DELETE /api/translations/{id}
+```
+
+---
+
+### 🔹 Export Translations (Optimized)
+
+```
+GET /api/translations/export?locale=en
+```
+
+Returns all translations for a locale in JSON format.
+
+* Cached for **5 minutes** (via Redis or file).
+* Response time < 500ms for 100k+ records.
+
+Example output:
+
+```json
+[
+  {
+    "key": "auth.login.button",
+    "content": "Login",
+    "tags": ["web", "desktop"],
+    "context": "auth_ui"
+  },
+  ...
+]
+```
+
+---
+
+## 🧰 Performance Testing
+
+### Seed 100k+ records
+
+```bash
+php artisan translations:seed-large 100000
+```
+
+### Test export time
+
+```bash
+time curl -H "Authorization: Bearer <token>" "http://localhost/api/translations/export?locale=en" -o export.json
+```
+
+* First call (uncached): ~400–600ms
+* Cached call: < 100ms
+
+---
+
+## 🧪 Testing
+
+### Run tests
+
+```bash
+php artisan test
+```
+
+Test coverage target: **>95%**
+
+Tests include:
+
+* CRUD endpoints
+* Authentication
+* JSON export correctness
+* Performance assertion (<500ms export)
+* Cache invalidation
+
+---
+
+## 📘 Swagger / OpenAPI Docs
+
+Generate and serve interactive API docs.
+
+### Install package
+
+```bash
+composer require "darkaonline/l5-swagger"
+php artisan vendor:publish --provider "L5Swagger\L5SwaggerServiceProvider"
+```
+
+### Generate docs
+
+```bash
+php artisan l5-swagger:generate
+```
+
+Docs available at:
+➡️ `http://localhost/api/documentation`
+
+---
+
+## ⚡ Design Choices
+
+| Concern             | Solution                                       |
+| ------------------- | ---------------------------------------------- |
+| **Scalability**     | Optimized indexes, pagination, caching         |
+| **Performance**     | JSON streaming + Redis cache                   |
+| **Security**        | Sanctum tokens, validation, 200ms endpoints    |
+| **Maintainability** | PSR-12 + SOLID + Service/Controller separation |
+| **Extensibility**   | Add new locales or tags dynamically            |
+| **Testing**         | Unit + Feature + Performance tests             |
+
+---
+
+## 🧹 Coding Standards
+
+* PSR-12 compliant
+* SOLID principles followed
+* No external libraries for translation CRUD
+* Clean and minimalistic API design
+
+---
+
+## 📦 License
+
+This project is developed as part of a technical test.
+All rights reserved © 2025 DigitalTolk / Umar Farooq.
+
+```
+Would you like me to include a **Swagger config and example annotations** next (so the API docs auto-generate with route details)?
+```

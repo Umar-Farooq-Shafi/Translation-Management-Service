@@ -12,11 +12,11 @@ class TranslationResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id'     => $this->id,
-            'key'    => $this->key,
+            'id' => $this->id,
+            'key' => $this->key,
             'locale' => $this->locale,
-            'value'  => $this->value,
-            'tags'   => $this->whenLoaded('tags', fn () => $this->tags->pluck('name')->all()),
+            'content' => $this->content,
+            'tags' => $this->tags,
             'updated_at' => $this->updated_at?->toISOString(),
         ];
     }

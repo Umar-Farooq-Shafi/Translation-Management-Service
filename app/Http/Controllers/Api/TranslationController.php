@@ -6,19 +6,24 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\TranslationResource;
-use App\Models\Tag;
 use App\Models\Translation;
-use Illuminate\Database\Eloquent\Builder;
+use App\Services\TranslationsService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Validation\Rule;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class TranslationController extends Controller
 {
+
+    public function __construct(
+        protected TranslationsService $translationsService,
+    )
+    {
+    }
 
     /**
      * @param Request $request
@@ -39,7 +44,7 @@ class TranslationController extends Controller
 
         $perPage = $validated['perPage'] ?? 20;
 
-        $query = Translation::query()->with('tags');
+        $query = Translation::query();
 
         if (!empty($validated['locale'])) {
             $query->where('locale', $validated['locale']);
@@ -55,15 +60,16 @@ class TranslationController extends Controller
             try {
                 $query->whereRaw("MATCH(content) AGAINST(? IN NATURAL LANGUAGE MODE)", [$search]);
             } catch (\Exception $e) {
-                // Fallback to LIKE if full-text search not supported
                 $query->where('content', 'like', '%' . addcslashes($search, '%_') . '%');
             }
         }
 
         $tagsFilter = $validated['tags'] ?? (isset($validated['tag']) ? [$validated['tag']] : []);
         if (!empty($tagsFilter)) {
-            $query->whereHas('tags', function (Builder $q) use ($tagsFilter) {
-                $q->whereIn('name', $tagsFilter);
+            $query->where(function ($q) use ($tagsFilter) {
+                foreach ($tagsFilter as $tag) {
+                    $q->orWhereJsonContains('tags', $tag);
+                }
             });
         }
 
@@ -78,7 +84,6 @@ class TranslationController extends Controller
      */
     public function show(Translation $translation): TranslationResource
     {
-        $translation->load('tags');
         return new TranslationResource($translation);
     }
 
@@ -88,7 +93,7 @@ class TranslationController extends Controller
      */
     public function store(Request $request): JsonResponse
     {
-        $data = $request->validate([
+        $validated = $request->validate([
             'key' => ['required', 'string', 'max:255'],
             'locale' => ['required', 'string', 'max:10'],
             'content' => ['required', 'string'],
@@ -97,23 +102,12 @@ class TranslationController extends Controller
             'context' => 'nullable|string|max:255',
         ]);
 
-        $translation = null;
+        $translation = Translation::updateOrCreate(
+            ['key' => $validated['key'], 'locale' => $validated['locale']],
+            $validated
+        );
 
-        DB::transaction(function () use (&$translation, $data) {
-            $translation = Translation::query()->updateOrCreate(
-                ['key' => $data['key'], 'locale' => $data['locale']],
-                ['value' => $data['value']]
-            );
-
-            if (!empty($data['tags'])) {
-                $tagIds = collect($data['tags'])->map(function (string $name) {
-                    return Tag::firstOrCreate(['name' => $name])->id;
-                })->all();
-                $translation->tags()->sync($tagIds);
-            }
-        });
-
-        $translation->load('tags');
+        Cache::forget("export_{$translation->locale}");
 
         return (new TranslationResource($translation))
             ->additional(['message' => 'Saved'])
@@ -128,7 +122,7 @@ class TranslationController extends Controller
      */
     public function update(Request $request, Translation $translation): TranslationResource
     {
-        $data = $request->validate([
+        $validated = $request->validate([
             'key' => ['sometimes', 'string', 'max:255', Rule::unique('translations')->ignore($translation->id)->where(fn($q) => $q->where('locale', $translation->locale))],
             'locale' => ['sometimes', 'string', 'max:10'],
             'content' => ['sometimes', 'string'],
@@ -137,28 +131,8 @@ class TranslationController extends Controller
             'context' => 'nullable|string|max:255',
         ]);
 
-        DB::transaction(function () use ($translation, $data) {
-            if (isset($data['key'])) {
-                $translation->key = $data['key'];
-            }
-
-            if (isset($data['locale'])) {
-                $translation->locale = $data['locale'];
-            }
-
-            if (array_key_exists('value', $data)) {
-                $translation->value = $data['value'];
-            }
-
-            $translation->save();
-
-            if (isset($data['tags'])) {
-                $tagIds = collect($data['tags'])->map(fn(string $name) => Tag::firstOrCreate(['name' => $name])->id)->all();
-                $translation->tags()->sync($tagIds);
-            }
-        });
-
-        $translation->load('tags');
+        $translation->update($validated);
+        Cache::forget("export_{$translation->locale}");
 
         return new TranslationResource($translation);
     }
@@ -169,7 +143,7 @@ class TranslationController extends Controller
      */
     public function destroy(Translation $translation): Response
     {
-        $translation->tags()->detach();
+        Cache::forget("export_{$translation->locale}");
         $translation->delete();
 
         return response()->noContent();
@@ -183,30 +157,7 @@ class TranslationController extends Controller
     {
         $locale = $request->input('locale', 'en');
 
-        $response = new StreamedResponse(function() use ($locale) {
-            echo '[';
-            $first = true;
-
-            Translation::where('locale', $locale)
-                ->orderBy('id')
-                ->cursor()
-                ->each(function($t) use (&$first) {
-                    if (!$first) echo ',';
-                    echo json_encode([
-                        'key' => $t->key,
-                        'content' => $t->content,
-                        'tags' => $t->tags,
-                        'context' => $t->context,
-                    ]);
-                    $first = false;
-                    flush();
-                });
-
-            echo ']';
-        });
-
-        $response->headers->set('Content-Type', 'application/json');
-        return $response;
+        return $this->translationsService->export($locale);
     }
 
 }

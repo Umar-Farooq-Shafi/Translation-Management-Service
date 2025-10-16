@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Tests\Feature;
 
 use App\Models\ApiToken;
-use App\Models\Tag;
 use App\Models\Translation;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -17,7 +16,11 @@ class TranslationApiTest extends TestCase
     protected function authHeader(): array
     {
         $plain = str_repeat('a', 64);
-        ApiToken::create(['name' => 'test', 'token_hash' => hash('sha256', $plain)]);
+        ApiToken::create([
+            'name' => 'test',
+            'token_hash' => hash('sha256', $plain),
+        ]);
+
         return ['Authorization' => 'Bearer ' . $plain];
     }
 
@@ -28,7 +31,7 @@ class TranslationApiTest extends TestCase
         $this->json('POST', '/api/translations', [
             'key' => 'greeting.hello',
             'locale' => 'en',
-            'value' => 'Hello',
+            'content' => 'Hello',
             'tags' => ['web', 'common'],
         ], $headers)->assertCreated();
 
@@ -41,12 +44,19 @@ class TranslationApiTest extends TestCase
     {
         $headers = $this->authHeader();
 
-        $t1 = Translation::create(['key' => 'home.title', 'locale' => 'en', 'value' => 'Welcome Home']);
-        $t2 = Translation::create(['key' => 'home.title', 'locale' => 'fr', 'value' => 'Bienvenue']);
-        $web = Tag::create(['name' => 'web']);
-        $mobile = Tag::create(['name' => 'mobile']);
-        $t1->tags()->sync([$web->id]);
-        $t2->tags()->sync([$mobile->id]);
+        Translation::create([
+            'key' => 'home.title',
+            'locale' => 'en',
+            'content' => 'Welcome Home',
+            'tags' => ['web'],
+        ]);
+
+        Translation::create([
+            'key' => 'home.title',
+            'locale' => 'fr',
+            'content' => 'Bienvenue',
+            'tags' => ['mobile'],
+        ]);
 
         $this->json('GET', '/api/translations?tags[0]=web&locale=en&q=Welcome', [], $headers)
             ->assertOk()
