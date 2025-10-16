@@ -2,8 +2,10 @@ FROM php:8.3-fpm
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
-    libzip-dev zip unzip git libicu-dev libonig-dev libxml2-dev curl \
-    && docker-php-ext-install pdo pdo_mysql intl opcache
+    git zip unzip curl libpng-dev libonig-dev libxml2-dev libzip-dev \
+    && docker-php-ext-install pdo_mysql zip bcmath \
+    && pecl install redis \
+    && docker-php-ext-enable redis
 
 # Install Composer globally
 RUN curl -sS https://getcomposer.org/installer | php && \

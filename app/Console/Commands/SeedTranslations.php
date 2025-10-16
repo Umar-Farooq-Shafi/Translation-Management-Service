@@ -6,70 +6,54 @@ namespace App\Console\Commands;
 
 use App\Models\Tag;
 use App\Models\Translation;
+use Faker\Factory;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class SeedTranslations extends Command
 {
     protected $signature = 'translations:seed {count=100000}';
     protected $description = 'Seed translations and tags efficiently for scalability testing';
 
-    public function handle(): int
+    public function handle()
     {
         $count = (int) $this->argument('count');
         $this->info("Seeding {$count} translations...");
 
-        $tags = ['mobile', 'desktop', 'web', 'marketing', 'admin', 'common'];
-        foreach ($tags as $t) {
-            Tag::firstOrCreate(['name' => $t]);
-        }
-        $tagIds = Tag::pluck('id')->all();
+        $chunk = 1000;
+        $faker = Factory::create();
 
-        $chunk = 5000;
-        $inserted = 0;
+        $locales = ['en','fr','es','de','it','pt'];
+        $tagsPool = ['web','mobile','desktop','email','admin'];
 
-        DB::disableQueryLog();
+        $bar = $this->output->createProgressBar($count);
+        $bar->start();
 
-        while ($inserted < $count) {
-            $batch = min($chunk, $count - $inserted);
+        for ($i = 0; $i < $count; $i += $chunk) {
+            $batch = [];
+            $limit = min($chunk, $count - $i);
 
-            $translations = Translation::factory()->count($batch)->make();
-            // Insert in chunks using upsert to respect unique (key, locale)
-            $toUpsert = $translations->map(function ($tr) {
-                return [
-                    'key' => $tr->key,
-                    'locale' => $tr->locale,
-                    'value' => $tr->value,
+            for ($j = 0; $j < $limit; $j++) {
+                $key = Str::slug($faker->words(3, true), '.');
+
+                $batch[] = [
+                    'key' => $key,
+                    'locale' => $faker->randomElement($locales),
+                    'content' => $faker->sentence(8),
+                    'tags' => json_encode($faker->randomElements($tagsPool, $faker->numberBetween(1,2))),
+                    'context' => $faker->randomElement(['ui','errors','emails', null]),
                     'created_at' => now(),
                     'updated_at' => now(),
                 ];
-            })->all();
-
-            // Upsert
-            Translation::query()->upsert($toUpsert, ['key', 'locale'], ['value', 'updated_at']);
-
-            // Attach random tags (2 per translation average)
-            $ids = Translation::query()
-                ->latest('id')
-                ->limit($batch)
-                ->pluck('id');
-
-            $pivot = [];
-            foreach ($ids as $id) {
-                $pick = collect($tagIds)->random(rand(1, 3))->all();
-                foreach ($pick as $tid) {
-                    $pivot[] = ['translation_id' => $id, 'tag_id' => $tid, 'created_at' => now(), 'updated_at' => now()];
-                }
-            }
-            if (!empty($pivot)) {
-                DB::table('translation_tag')->insert($pivot);
+                $bar->advance();
             }
 
-            $inserted += $batch;
-            $this->info("Inserted: {$inserted}/{$count}");
+            DB::table('translations')->insert($batch);
+            unset($batch);
         }
 
-        $this->info('Done.');
-        return 0;
+        $bar->finish();
+        $this->info("\nDone.");
     }
 }

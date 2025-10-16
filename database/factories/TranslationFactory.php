@@ -6,6 +6,7 @@ namespace Database\Factories;
 
 use App\Models\Translation;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Str;
 
 class TranslationFactory extends Factory
 {
@@ -14,12 +15,16 @@ class TranslationFactory extends Factory
     public function definition(): array
     {
         $locales = ['en', 'fr', 'es', 'de', 'it', 'pt'];
-        $baseKey = fake()->unique()->slug(3);
+        $tagsPool = ['web','mobile','desktop','email','admin'];
+
+        $key = $this->faker->words(3, true);
+        $key = Str::slug($key, '.');
 
         return [
-            'key' => "app.$baseKey",
-            'locale' => fake()->randomElement($locales),
-            'value' => fake()->sentence(8),
+            'key' => $key,
+            'locale' => $this->faker->randomElement($locales),
+            'content' => $this->faker->sentence(6),
+            'tags' => $this->faker->randomElements($tagsPool, $this->faker->numberBetween(1,2)),
         ];
     }
 }

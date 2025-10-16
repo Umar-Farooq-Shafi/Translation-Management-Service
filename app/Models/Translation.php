@@ -14,15 +14,15 @@ class Translation extends Model
     protected $fillable = [
         'key',
         'locale',
-        'value',
+        'content',
+        'tags',
+        'context',
     ];
 
     protected $casts = [
-        'created_at' => 'datetime',
-        'updated_at' => 'datetime',
+        'tags' => 'array',
     ];
 
-    // Unique by (key, locale)
 
     public function tags()
     {
