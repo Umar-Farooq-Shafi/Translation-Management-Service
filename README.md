@@ -1,4 +1,4 @@
-```markdown
+
 # 🌐 Laravel Translation Management Service
 
 This project is built as part of the **Laravel Senior Developer Code Test - DigitalTolk**.
@@ -9,6 +9,7 @@ It’s an **API-driven Translation Management Service** designed to manage multi
 
 ## 🚀 Features
 
+```
 - Manage translations for multiple locales (`en`, `fr`, `es`, etc.)
 - Tag translations for context (e.g., `mobile`, `desktop`, `web`)
 - RESTful API endpoints for CRUD, search, and export
