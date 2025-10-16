@@ -278,7 +278,3 @@ Docs available at:
 
 This project is developed as part of a technical test.
 All rights reserved © 2025 DigitalTolk / Umar Farooq.
-
-```
-Would you like me to include a **Swagger config and example annotations** next (so the API docs auto-generate with route details)?
-```
