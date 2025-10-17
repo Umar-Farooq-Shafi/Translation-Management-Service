@@ -42,7 +42,6 @@ class SeedTranslations extends Command
                     'locale' => $faker->randomElement($locales),
                     'content' => $faker->sentence(8),
                     'tags' => json_encode($faker->randomElements($tagsPool, $faker->numberBetween(1, 2))),
-                    'context' => $faker->randomElement(['ui', 'errors', 'emails', null]),
                     'created_at' => $timestamp,
                     'updated_at' => $timestamp,
                 ];

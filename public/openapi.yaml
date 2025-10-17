@@ -45,7 +45,6 @@ paths:
                 key: { type: string }
                 locale: { type: string }
                 content: { type: string }
-                context: { type: string, nullable: true }
                 tags:
                   type: array
                   items: { type: string }
@@ -83,7 +82,6 @@ paths:
                 key: { type: string }
                 locale: { type: string }
                 content: { type: string }
-                context: { type: string, nullable: true }
                 tags:
                   type: array
                   items: { type: string }

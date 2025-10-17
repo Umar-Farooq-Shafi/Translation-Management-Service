@@ -16,7 +16,6 @@ class Translation extends Model
         'locale',
         'content',
         'tags',
-        'context',
     ];
 
     protected $casts = [

@@ -99,7 +99,6 @@ class TranslationController extends Controller
             'content' => ['required', 'string'],
             'tags' => ['sometimes', 'array'],
             'tags.*' => ['string', 'max:64'],
-            'context' => 'nullable|string|max:255',
         ]);
 
         $translation = Translation::updateOrCreate(
@@ -128,7 +127,6 @@ class TranslationController extends Controller
             'content' => ['sometimes', 'string'],
             'tags' => ['sometimes', 'array'],
             'tags.*' => ['string', 'max:64'],
-            'context' => 'nullable|string|max:255',
         ]);
 
         $translation->update($validated);

@@ -140,8 +140,7 @@ POST /api/translations
   "key": "auth.login.button",
   "locale": "en",
   "content": "Login",
-  "tags": ["web", "desktop"],
-  "context": "auth_ui"
+  "tags": ["web", "desktop"]
 }
 ```
 
@@ -183,8 +182,7 @@ Example output:
   {
     "key": "auth.login.button",
     "content": "Login",
-    "tags": ["web", "desktop"],
-    "context": "auth_ui"
+    "tags": ["web", "desktop"]
   },
   ...
 ]
