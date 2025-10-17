@@ -21,7 +21,6 @@ return new class extends Migration {
             $table->unique(['key', 'locale']);
 
             $table->index(['locale', 'key']);
-            $table->index(['locale', 'tags']);
 
             $table->fullText(['content']);
         });
